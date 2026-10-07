@@ -105,3 +105,8 @@ shareButton.addEventListener('click', async () => {
     shareButton.disabled = false;
   }
 });
+
+const parentOrigin = new URLSearchParams(location.search).get("parent");
+document.getElementById("close-sidebar").addEventListener("click", () => {
+  if (parentOrigin && /^https?:\/\//.test(parentOrigin)) window.parent.postMessage({type:"verity:close-sidebar"}, parentOrigin);
+});

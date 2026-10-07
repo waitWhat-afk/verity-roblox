@@ -1,4 +1,4 @@
-chrome.sidePanel.setPanelBehavior({openPanelOnActionClick: true}).catch(console.error);
+chrome.sidePanel.setPanelBehavior({openPanelOnActionClick: false}).catch(console.error);
 
 chrome.runtime.onInstalled.addListener(() => {
   const domains = ['chatgpt.com', 'claude.ai', 'gemini.google.com', 'grok.com'];
@@ -21,4 +21,20 @@ chrome.runtime.onInstalled.addListener(() => {
       }
     }))
   }).catch(console.error);
+});
+
+async function toggleSidebar(tab) {
+  if (!tab?.id) return;
+  try {
+    await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ['overlay.js']});
+    await chrome.action.setBadgeText({tabId: tab.id, text: ''});
+  } catch (error) {
+    console.warn('Custom sidebar is unavailable on this page:', error.message);
+    await chrome.action.setBadgeText({tabId: tab.id, text: '!'}).catch(() => {});
+    await chrome.action.setTitle({tabId: tab.id, title: 'Open a normal website to use the sidebar'}).catch(() => {});
+  }
+}
+chrome.action.onClicked.addListener(toggleSidebar);
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.sidePanel.setOptions({enabled: false}).catch(console.error);
 });
